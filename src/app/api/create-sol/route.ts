@@ -5,7 +5,7 @@ import {
   Connection,
   Keypair,
   LAMPORTS_PER_SOL,
-  PublicKey,
+  ComputeBudgetProgram,
   Transaction,
 } from "@solana/web3.js";
 import {
@@ -17,6 +17,7 @@ import { PumpFunSDK } from "pumpdotfun-sdk";
 import { AnchorProvider } from "@coral-xyz/anchor";
 import { getFile, upload } from "@/app/actions";
 
+const SLIPPAGE_BASIS_POINTS = BigInt(100);
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 2000; // 2 seconds
 const TRANSACTION_TIMEOUT = 120000; // 2 minutes
@@ -182,8 +183,14 @@ export async function POST(req: NextRequest) {
           keypair,
           mint,
           tokenMetadata,
-          BigInt(0.0001 * LAMPORTS_PER_SOL)
+          BigInt(0.0001 * LAMPORTS_PER_SOL),
+          SLIPPAGE_BASIS_POINTS,
+          {
+            unitLimit: 250000,
+            unitPrice: 250000,
+          }
         );
+        
         
         if (createResults.success) {
           console.log("Token creation successful on attempt", i + 1);
